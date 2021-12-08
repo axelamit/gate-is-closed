@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.pl": "prolog",
+        "box.h": "c",
+        "game.h": "c",
+        "block.h": "c"
+    }
+}

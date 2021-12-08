@@ -1,0 +1,27 @@
+9 10
+xxxxxxxdxx
+xoooooooox
+xoooooooox
+xoooooooox
+xoooooooox
+xoooooooox
+xoooooooox
+xoooooooox
+xxxxxxxxxx
+3
+4 2 and
+4 6 or
+2 2 not
+6
+2 4 source
+4 4 simple
+7 4 connector
+7 7 connector
+4 7 door
+7 2 source
+5
+0 1
+1 2
+2 3
+3 4
+5 2

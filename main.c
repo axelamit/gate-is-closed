@@ -1,6 +1,6 @@
 #include <pic32mx.h>
 
-#include "game.h"
+#include "game_main.h"
 
 int main()
 {
