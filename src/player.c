@@ -10,7 +10,7 @@ void init_player(struct player *p, int x, int y, int direction)
     p->pos_y = y;
     p->direction = direction;
 
-    p->speed = 10;
+    p->speed = 25;
     p->is_moving = 0;
     p->acceleration = 1; // not in use
 

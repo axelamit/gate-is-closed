@@ -137,6 +137,5 @@ while (running):
     pygame.draw.rect(screen, (255,0,0), (gamestate[0] * drawing_scale, gamestate[1] * drawing_scale, blocksize * drawing_scale, blocksize * drawing_scale))
 
     pygame.display.update()
-    time.sleep(0.1)
 
 pygame.quit()
