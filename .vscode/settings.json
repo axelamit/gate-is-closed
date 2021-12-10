@@ -3,6 +3,8 @@
         "*.pl": "prolog",
         "box.h": "c",
         "game.h": "c",
-        "block.h": "c"
+        "block.h": "c",
+        "stdint.h": "c",
+        "player.h": "c"
     }
 }

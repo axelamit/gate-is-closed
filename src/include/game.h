@@ -4,11 +4,27 @@
 #include "player.h"
 #include "map.h"
 
+enum GAMESTATE
+{
+    GAME = 0,
+    SELECT_NAME = 1,
+    READ_SCOREBOARD = 2,
+    DISPLAY_SCOREBOARD = 3
+};
+
 struct game
 {
     struct player player;
     struct map map;
     int level;
+    int time;
+    int final_time;
+    int state;
+
+    char score;
+
+    int curr_button;
+    char curr_name[3];
 };
 
 void init_game(struct game *g, int level);

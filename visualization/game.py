@@ -43,6 +43,8 @@ def get_gamestate():
     return gamestate
 
 screen = pygame.display.set_mode([500, 500])
+font = pygame.font.Font(pygame.font.get_default_font(), 20)
+font2 = pygame.font.Font(pygame.font.get_default_font(), 40)
 
 blocksize = 100
 drawing_scale = 0.5
@@ -132,10 +134,34 @@ while (running):
         
         buffer_index += 3
 
+    # Draw time
+    text = "Time: {}".format(gamestate[buffer_index])
+    #text_surface = font.render(text)
+    text_surface = font.render(text, True, (0, 0, 0))
+    screen.blit(text_surface, dest=(10,10))
+    buffer_index += 1
 
     #Draw player
     pygame.draw.rect(screen, (255,0,0), (gamestate[0] * drawing_scale, gamestate[1] * drawing_scale, blocksize * drawing_scale, blocksize * drawing_scale))
 
+    # Select name
+    select_name = gamestate[buffer_index]
+    buffer_index += 1
+    if (select_name):
+        screen.fill((255, 255, 255))
+        text = "Name: {}{}{}".format(chr(gamestate[buffer_index]), chr(gamestate[buffer_index + 1]), chr(gamestate[buffer_index + 2]))
+        text_surface = font2.render(text, True, (0, 0, 0))
+        screen.blit(text_surface, dest=(100,100))
+        buffer_index += 3
+
+    # Display scoreboard
+    display_scoreboard = gamestate[buffer_index]
+    buffer_index += 1
+    if (display_scoreboard):
+        screen.fill((255, 100, 165))
+        print (gamestate[buffer_index])
+        buffer_index += 1
+        
     pygame.display.update()
 
 pygame.quit()

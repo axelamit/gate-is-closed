@@ -1,14 +1,25 @@
-#include <stdio.h>
-
 #include "include/game.h"
 #include "include/simulate.h"
 #include "include/texture.h"
+
+#include "include/i2c.h"
 
 void init_game(struct game *g, int level)
 {
     init_player(&g->player, 100, 100, 0); // starting pos should be dependent on the size of the grid (change this + player.c)
     create_map(&g->map, 1);
     g->level = level;
+    g->time = 0;
+    g->final_time = 0;
+    g->state = SELECT_NAME;
+    g->curr_button = 0;
+
+    g->score = 'a';
+
+    for (int i = 0; i < 3; i++)
+    {
+        g->curr_name[i] = 'A';
+    }
 }
 
 void get_gamestate(int gamestate[], struct game *g)
@@ -79,37 +90,133 @@ void get_gamestate(int gamestate[], struct game *g)
         gamestate[buffer_index + 2] = g->map.boxes[i].y;
         buffer_index += 3;
     }
+
+    gamestate[buffer_index] = g->time;
+    buffer_index++;
+
+    gamestate[buffer_index] = 0;
+    if (g->state == SELECT_NAME || g->state == READ_SCOREBOARD)
+    {
+        gamestate[buffer_index] = 1;
+        for (int i = 0; i < 3; i++)
+        {
+            gamestate[buffer_index + i + 1] = g->curr_name[i];
+        }
+        buffer_index += 3;
+    }
+    buffer_index++;
+
+    gamestate[buffer_index] = 0;
+    if (g->state == DISPLAY_SCOREBOARD)
+    {
+        gamestate[buffer_index] = 1;
+        gamestate[buffer_index + 1] = g->score;
+    }
+    buffer_index++;
 }
 
 void next_gamestate(int gamestate[], struct game *g)
 {
-    move_player(&g->player, &g->map);
-    int complete = simulate(&g->map);
-    if (complete)
+    if (g->state == GAME)
     {
-        int door_x = -1;
-        int door_y = -1;
-        for (int i = 0; i < g->map.height; i++)
+        move_player(&g->player, &g->map);
+        int complete = simulate(&g->map);
+        if (complete)
         {
-            for (int j = 0; j < g->map.width; j++)
+            int door_x = -1;
+            int door_y = -1;
+            for (int i = 0; i < g->map.height; i++)
             {
-                if (g->map.ground[i][j].texture == DOOR_CLOSED || g->map.ground[i][j].texture == DOOR_OPEN)
+                for (int j = 0; j < g->map.width; j++)
                 {
-                    g->map.ground[i][j].texture = DOOR_OPEN;
-                    door_x = j * g->map.grid_size;
-                    door_y = i * g->map.grid_size;
+                    if (g->map.ground[i][j].texture == DOOR_CLOSED || g->map.ground[i][j].texture == DOOR_OPEN)
+                    {
+                        g->map.ground[i][j].texture = DOOR_OPEN;
+                        door_x = j * g->map.grid_size;
+                        door_y = i * g->map.grid_size;
+                    }
+                }
+            }
+
+            if (door_x == g->player.pos_x && door_y == g->player.pos_y)
+            {
+                // g->level += 1;
+                // g->time = 0;
+                g->final_time = g->time;
+                g->state = SELECT_NAME;
+                // g->map = create_map(g->level);
+            }
+        }
+    }
+    else if (g->state == SELECT_NAME)
+    {
+        if (g->curr_button == 1)
+        {
+            g->state = READ_SCOREBOARD;
+        }
+        else
+        {
+            for (int i = 2; i <= 4; i++)
+            {
+                if (g->curr_button == i)
+                {
+                    g->curr_name[4 - i]++;
+                    if (g->curr_name[4 - i] > 90)
+                    {
+                        g->curr_name[4 - i] = 'A';
+                    }
                 }
             }
         }
+    }
+    else if (g->state == READ_SCOREBOARD)
+    {
 
-        if (door_x == g->player.pos_x && door_y == g->player.pos_y)
+        do
         {
-            g->level += 1;
-            // g->map = create_map(g->level);
+            i2c_start();
+        } while (!i2c_send(EEPROM_WRITE));
+
+        i2c_send(EEPROM_MEM_ADD >> 8);
+        i2c_send(EEPROM_MEM_ADD);
+        i2c_send('g');
+        i2c_stop();
+
+        // do
+        // {
+        //     i2c_restart();
+        // } while (!i2c_send(EEPROM_READ));
+
+        do
+        {
+            i2c_start();
+        } while (!i2c_send(EEPROM_WRITE));
+
+        i2c_send(EEPROM_MEM_ADD >> 8);
+        i2c_send(EEPROM_MEM_ADD);
+
+        i2c_start();
+        i2c_send(EEPROM_READ);
+
+        g->score = i2c_recv();
+
+        i2c_nack();
+        i2c_stop();
+
+        // g->score = '7';
+
+        g->state = DISPLAY_SCOREBOARD;
+    }
+    else if (g->state == DISPLAY_SCOREBOARD)
+    {
+        if (g->curr_button == 1)
+        {
             g->player.pos_x = 100;
             g->player.pos_y = 100;
+            g->time = 0;
+            g->state = GAME;
         }
-        // if (g->player.pos_x / g->map.grid_size == )
     }
+
     get_gamestate(gamestate, g);
 }
