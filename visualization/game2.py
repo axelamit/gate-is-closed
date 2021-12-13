@@ -57,7 +57,7 @@ while (running):
         if (event.type == pygame.QUIT): 
             running = False
 
-    screen.fill((255, 255, 255))
+    screen.fill((0, 0, 0))
 
     gamestate = get_gamestate()
     #print (gamestate)
@@ -70,13 +70,14 @@ while (running):
                 pygame.draw.rect(screen, (95,90,82), (j * blocksize * drawing_scale, i * blocksize * drawing_scale, blocksize * drawing_scale, blocksize * drawing_scale))
             else:
                 # Ground
-                n = (hash('{}'.format((j * blocksize * drawing_scale, i * blocksize * drawing_scale))))%12
-                tile_file_name = 'images/tile{}.png'.format(n+1)
-                tile = pygame.image.load(tile_file_name)
-                tile = pygame.transform.scale(tile, (int(blocksize * drawing_scale), int(blocksize * drawing_scale)))
-                tile.convert()
-                screen.blit(tile, (j * blocksize * drawing_scale, i * blocksize * drawing_scale))
-                #pygame.draw.rect(screen, (255,255,255), (j * blocksize * drawing_scale, i * blocksize * drawing_scale, blocksize * drawing_scale, blocksize * drawing_scale))
+                # n = (hash('{}'.format((j * blocksize * drawing_scale, i * blocksize * drawing_scale))))%12
+                #tile_file_name = 'images/tile{}.png'.format(n+1)
+                # tile_file_name = 'images/tile{}.png'.format(1)
+                # tile = pygame.image.load(tile_file_name)
+                # tile = pygame.transform.scale(tile, (int(blocksize * drawing_scale), int(blocksize * drawing_scale)))
+                # tile.convert()
+                # screen.blit(tile, (j * blocksize * drawing_scale, i * blocksize * drawing_scale))
+                pygame.draw.rect(screen, (211,211,211), (j * blocksize * drawing_scale, i * blocksize * drawing_scale, blocksize * drawing_scale, blocksize * drawing_scale))
             
 
     # Door

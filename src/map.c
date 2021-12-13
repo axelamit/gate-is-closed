@@ -15,8 +15,8 @@ int connections[2 * MAX_GROUND_SIZE];
 // Level 1
 int height1 = 9;
 int width1 = 10;
-int door_x1 = 9;
-int door_y1 = 5;
+int door_x1 = 5;
+int door_y1 = 0;
 int num_boxes1 = 2;
 int num_connectors1 = 5;
 int num_connections1 = 4;

@@ -309,11 +309,4 @@ void game_loop()
     bn_sw_time();
     next_gamestate(gamestate, &g);
     send_gamestate(gamestate);
-    // if (iteration % 1000 == 0)
-    // {
-    //     next_gamestate(gamestate, &g);
-    //     send_gamestate(gamestate);
-    //     iteration = 0;
-    // }
-    // iteration++;
 }
