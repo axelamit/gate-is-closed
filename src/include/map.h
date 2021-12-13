@@ -17,6 +17,7 @@ struct map
     int height;
     int num_boxes;
     int num_connectors;
+    int num_connections;
 };
 
 void create_map(struct map *m, int level);

@@ -9,7 +9,8 @@ enum GAMESTATE
     GAME = 0,
     SELECT_NAME = 1,
     READ_SCOREBOARD = 2,
-    DISPLAY_SCOREBOARD = 3
+    DISPLAY_SCOREBOARD = 3,
+    NEXT_GAME = 4
 };
 
 struct game

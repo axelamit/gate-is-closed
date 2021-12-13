@@ -125,31 +125,3 @@ int i2c_recv_int(int location)
 
     return out;
 }
-
-// int i2c_recv_int(int location)
-// {
-//     do
-//     {
-//         i2c_start();
-//     } while (!i2c_send(EEPROM_WRITE));
-
-//     i2c_send(EEPROM_MEM_ADDR >> 8);
-//     i2c_send(EEPROM_MEM_ADDR + location);
-
-//     i2c_start();
-//     i2c_send(EEPROM_READ);
-
-//     int d = 1000;
-//     int out = 0;
-//     for (int i = 0; i < 4; i++)
-//     {
-//         out += ((int)i2c_recv()) * d;
-//         d /= 10;
-//         i2c_ack();
-//     }
-
-//     i2c_nack();
-//     i2c_stop();
-
-//     return out;
-// }

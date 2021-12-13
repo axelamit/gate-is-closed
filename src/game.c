@@ -191,11 +191,16 @@ void next_gamestate(int gamestate[], struct game *g)
 
             if (door_x == g->player.pos_x && door_y == g->player.pos_y)
             {
-                // g->level += 1;
-                // g->time = 0;
                 g->final_time = g->time;
-                g->state = SELECT_NAME;
-                // g->map = create_map(g->level);
+                int pos = get_scoreboard_pos(g->final_time, g->level);
+                if (pos == -1)
+                {
+                    g->state = NEXT_GAME;
+                }
+                else
+                {
+                    g->state = SELECT_NAME;
+                }
             }
         }
     }
@@ -230,11 +235,17 @@ void next_gamestate(int gamestate[], struct game *g)
     {
         if (g->curr_button == 1)
         {
-            g->player.pos_x = 100;
-            g->player.pos_y = 100;
-            g->time = 0;
-            g->state = GAME;
+            g->state = NEXT_GAME;
         }
+    }
+    else if (g->state == NEXT_GAME)
+    {
+        g->player.pos_x = 100;
+        g->player.pos_y = 100;
+        g->level++;
+        create_map(&g->map, g->level);
+        g->time = 0;
+        g->state = GAME;
     }
 
     get_gamestate(gamestate, g);

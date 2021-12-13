@@ -42,7 +42,7 @@ def get_gamestate():
 
     return gamestate
 
-screen = pygame.display.set_mode([500, 500])
+screen = pygame.display.set_mode([800, 800])
 font = pygame.font.Font(pygame.font.get_default_font(), 20)
 font2 = pygame.font.Font(pygame.font.get_default_font(), 40)
 
