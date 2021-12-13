@@ -5,6 +5,7 @@
         "game.h": "c",
         "block.h": "c",
         "stdint.h": "c",
-        "player.h": "c"
+        "player.h": "c",
+        "string_view": "c"
     }
 }

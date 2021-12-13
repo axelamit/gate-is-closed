@@ -3,6 +3,7 @@
 #include "include/texture.h"
 
 #include "include/i2c.h"
+#include "include/scoreboard.h"
 
 void init_game(struct game *g, int level)
 {
@@ -11,14 +12,17 @@ void init_game(struct game *g, int level)
     g->level = level;
     g->time = 0;
     g->final_time = 0;
-    g->state = SELECT_NAME;
+    g->state = GAME;
     g->curr_button = 0;
-
-    g->score = 'a';
 
     for (int i = 0; i < 3; i++)
     {
         g->curr_name[i] = 'A';
+    }
+
+    for (int i = 0; i < 3 * SCOREBOARD_ENTRIES; i++)
+    {
+        g->scoreboard_names[i] = 'A';
     }
 }
 
@@ -94,6 +98,7 @@ void get_gamestate(int gamestate[], struct game *g)
     gamestate[buffer_index] = g->time;
     buffer_index++;
 
+    // Pick name
     gamestate[buffer_index] = 0;
     if (g->state == SELECT_NAME || g->state == READ_SCOREBOARD)
     {
@@ -106,13 +111,49 @@ void get_gamestate(int gamestate[], struct game *g)
     }
     buffer_index++;
 
+    // Add scoreboard to gamestate
     gamestate[buffer_index] = 0;
+    buffer_index++;
     if (g->state == DISPLAY_SCOREBOARD)
     {
-        gamestate[buffer_index] = 1;
-        gamestate[buffer_index + 1] = g->score;
+        gamestate[buffer_index - 1] = SCOREBOARD_ENTRIES + 3 * SCOREBOARD_ENTRIES;
+
+        // Sort entries by score (also swap names at the same time)
+        int temp;
+        for (int i = 0; i < SCOREBOARD_ENTRIES; i++)
+        {
+            for (int j = i + 1; j < SCOREBOARD_ENTRIES; j++)
+            {
+                if (g->scoreboard_scores[i] > g->scoreboard_scores[j])
+                {
+                    temp = g->scoreboard_scores[i];
+                    g->scoreboard_scores[i] = g->scoreboard_scores[j];
+                    g->scoreboard_scores[j] = temp;
+
+                    for (int k = 0; k < 3; k++)
+                    {
+                        temp = g->scoreboard_names[i * 3 + k];
+                        g->scoreboard_names[i * 3 + k] = g->scoreboard_names[j * 3 + k];
+                        g->scoreboard_names[j * 3 + k] = temp;
+                    }
+                }
+            }
+        }
+
+        // Add scoreboard scores to gamestate
+        for (int i = 0; i < SCOREBOARD_ENTRIES; i++)
+        {
+            gamestate[buffer_index] = g->scoreboard_scores[i];
+            buffer_index++;
+        }
+
+        // Add scoreboard names to gamestate
+        for (int i = 0; i < 3 * SCOREBOARD_ENTRIES; i++)
+        {
+            gamestate[buffer_index] = g->scoreboard_names[i];
+            buffer_index++;
+        }
     }
-    buffer_index++;
 }
 
 void next_gamestate(int gamestate[], struct game *g)
@@ -171,40 +212,13 @@ void next_gamestate(int gamestate[], struct game *g)
     }
     else if (g->state == READ_SCOREBOARD)
     {
-
-        do
-        {
-            i2c_start();
-        } while (!i2c_send(EEPROM_WRITE));
-
-        i2c_send(EEPROM_MEM_ADD >> 8);
-        i2c_send(EEPROM_MEM_ADD);
-        i2c_send('g');
-        i2c_stop();
-
-        // do
+        // for (int i = 0; i < 50; i++)
         // {
-        //     i2c_restart();
-        // } while (!i2c_send(EEPROM_READ));
+        //     i2c_send_char(i, 0);
+        // }
 
-        do
-        {
-            i2c_start();
-        } while (!i2c_send(EEPROM_WRITE));
-
-        i2c_send(EEPROM_MEM_ADD >> 8);
-        i2c_send(EEPROM_MEM_ADD);
-
-        i2c_start();
-        i2c_send(EEPROM_READ);
-
-        g->score = i2c_recv();
-
-        i2c_nack();
-        i2c_stop();
-
-        // g->score = '7';
-
+        add_scoreboard_entry(g->curr_name, g->final_time, g->level);
+        get_scoreboard(g);
         g->state = DISPLAY_SCOREBOARD;
     }
     else if (g->state == DISPLAY_SCOREBOARD)

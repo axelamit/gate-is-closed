@@ -66,3 +66,90 @@ void i2c_stop()
     I2C1CONSET = 1 << 2; // PEN
     i2c_idle();
 }
+
+void i2c_send_char(int location, char c)
+{
+    do
+    {
+        i2c_start();
+    } while (!i2c_send(EEPROM_WRITE));
+
+    i2c_send(EEPROM_MEM_ADDR >> 8);
+    i2c_send(EEPROM_MEM_ADDR + location);
+    i2c_send(c);
+    i2c_stop();
+}
+
+char i2c_recv_char(int location)
+{
+    do
+    {
+        i2c_start();
+    } while (!i2c_send(EEPROM_WRITE));
+
+    i2c_send(EEPROM_MEM_ADDR >> 8);
+    i2c_send(EEPROM_MEM_ADDR + location);
+
+    i2c_start();
+    i2c_send(EEPROM_READ);
+
+    char out = i2c_recv();
+    i2c_nack();
+    i2c_stop();
+
+    return out;
+}
+
+// Not actual int
+void i2c_send_int(int location, int n)
+{
+    int d = 1000;
+    n = n % (d * 10);
+    for (int i = 0; i < 4; i++)
+    {
+        i2c_send_char(location + i, n / d);
+        n = n % d;
+        d /= 10;
+    }
+}
+
+int i2c_recv_int(int location)
+{
+    int d = 1000;
+    int out = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        out += i2c_recv_char(location + i) * d;
+        d /= 10;
+    }
+
+    return out;
+}
+
+// int i2c_recv_int(int location)
+// {
+//     do
+//     {
+//         i2c_start();
+//     } while (!i2c_send(EEPROM_WRITE));
+
+//     i2c_send(EEPROM_MEM_ADDR >> 8);
+//     i2c_send(EEPROM_MEM_ADDR + location);
+
+//     i2c_start();
+//     i2c_send(EEPROM_READ);
+
+//     int d = 1000;
+//     int out = 0;
+//     for (int i = 0; i < 4; i++)
+//     {
+//         out += ((int)i2c_recv()) * d;
+//         d /= 10;
+//         i2c_ack();
+//     }
+
+//     i2c_nack();
+//     i2c_stop();
+
+//     return out;
+// }

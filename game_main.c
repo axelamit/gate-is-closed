@@ -6,8 +6,8 @@
 #include "src/include/game.h"
 
 struct game g;
-const int N = 2 * (MAX_GROUND_SIZE * MAX_GROUND_SIZE);
-int gamestate[2 * (MAX_GROUND_SIZE * MAX_GROUND_SIZE)];
+const int N = 3 * (MAX_GROUND_SIZE * MAX_GROUND_SIZE);
+int gamestate[3 * (MAX_GROUND_SIZE * MAX_GROUND_SIZE)];
 
 int ticks = 0;
 int timeoutcount = 0;

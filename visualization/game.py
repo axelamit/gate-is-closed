@@ -159,8 +159,11 @@ while (running):
     buffer_index += 1
     if (display_scoreboard):
         screen.fill((255, 100, 165))
-        print (gamestate[buffer_index])
-        buffer_index += 1
+        for i in range(3):
+            text = "{}{}{}: {}".format(chr(gamestate[buffer_index + (i+1)*3]), chr(gamestate[buffer_index + (i+1)*3 + 1]), chr(gamestate[buffer_index + (i+1)*3 + 2]), gamestate[buffer_index])
+            text_surface = font2.render(text, True, (0, 0, 0))
+            screen.blit(text_surface, dest=(100,100 + i*30))
+        buffer_index += 12
         
     pygame.display.update()
 

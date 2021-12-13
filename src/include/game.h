@@ -21,10 +21,11 @@ struct game
     int final_time;
     int state;
 
-    char score;
-
     int curr_button;
     char curr_name[3];
+
+    int scoreboard_scores[3];
+    char scoreboard_names[9];
 };
 
 void init_game(struct game *g, int level);
