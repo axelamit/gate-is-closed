@@ -12,6 +12,7 @@ int gamestate[1 * (MAX_GROUND_SIZE * MAX_GROUND_SIZE)];
 
 int ticks = 0;
 int timeoutcount = 0;
+int switch_state = 1;
 
 void user_isr(void)
 {
@@ -148,6 +149,19 @@ void bn_sw_time(void)
             g.player.is_grabbing = 1;
         }
 
+        if (sw_status & 4)
+        {
+            if (switch_state)
+            {
+                g.input_state++;
+                if (g.input_state == g.map.num_input_states)
+                {
+                    g.input_state = 0;
+                }
+                switch_state = 0;
+            }
+        }
+
         if (sw_status & 1)
         {
             for (int i = 0; i < 50; i++)
@@ -159,6 +173,15 @@ void bn_sw_time(void)
     else
     {
         g.player.is_grabbing = 0;
+        if (switch_state == 0)
+        {
+            g.input_state++;
+            if (g.input_state == g.map.num_input_states)
+            {
+                g.input_state = 0;
+            }
+            switch_state = 1;
+        }
     }
 }
 

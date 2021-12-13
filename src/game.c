@@ -14,6 +14,7 @@ void init_game(struct game *g, int level)
     g->final_time = 0;
     g->state = GAME;
     g->curr_button = 0;
+    g->input_state = 0;
 
     for (int i = 0; i < 3; i++)
     {
@@ -171,7 +172,31 @@ void next_gamestate(int gamestate[], struct game *g)
     if (g->state == GAME)
     {
         move_player(&g->player, &g->map);
-        int complete = simulate(&g->map);
+
+        int complete = 1;
+        for (int i = 0; i < g->input_state; i++)
+        {
+            int comp = simulate(&g->map, i);
+            if (comp == 0)
+            {
+                complete = 0;
+            }
+        }
+
+        for (int i = g->input_state + 1; i < g->map.num_input_states; i++)
+        {
+            int comp = simulate(&g->map, i);
+            if (comp == 0)
+            {
+                complete = 0;
+            }
+        }
+
+        int comp = simulate(&g->map, g->input_state);
+        if (comp == 0)
+        {
+            complete = 0;
+        }
         if (complete)
         {
             int door_x = -1;

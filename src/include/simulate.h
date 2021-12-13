@@ -3,7 +3,7 @@
 
 #include "map.h"
 
-int simulate_step(int index, struct map *m); 
-int simulate(struct map *m); 
+int simulate_step(int index, struct map *m);
+int simulate(struct map *m, int input_state);
 
 #endif

@@ -57,6 +57,7 @@ int simulate_step(int index, struct map *m)
                             return m->connectors[index].state = 1;
                         }
                     }
+                    return m->connectors[index].state = 0;
                 }
                 else if (m->boxes[i].type == AND)
                 {
@@ -80,19 +81,41 @@ int simulate_step(int index, struct map *m)
                     }
                     return m->connectors[index].state = 1;
                 }
+                else if (m->boxes[i].type == NAND)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        if (inputs[j] == 0)
+                        {
+                            return m->connectors[index].state = 1;
+                        }
+                    }
+                    return m->connectors[index].state = 0;
+                }
+                else if (m->boxes[i].type == NOR)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        if (inputs[j] == 1)
+                        {
+                            return m->connectors[index].state = 0;
+                        }
+                    }
+                    return m->connectors[index].state = 1;
+                }
             }
         }
     }
     return m->connectors[index].state = 0;
 }
 
-int simulate(struct map *m)
+int simulate(struct map *m, int input_state)
 {
 
     // Find door
     int door_index = 0;
 
-    int seen_source = 0;
+    int sources = 0;
     for (int i = 0; i < m->num_connectors; i++)
     {
         if (m->connectors[i].connector_type == DOOR_CONNECTOR)
@@ -101,11 +124,8 @@ int simulate(struct map *m)
         }
         else if (m->connectors[i].connector_type == SOURCE)
         {
-            if (seen_source == 0)
-            {
-                m->connectors[i].state = 1;
-                seen_source = 1;
-            }
+            m->connectors[i].state = m->input_states[sources * m->num_input_states + input_state];
+            sources++;
         }
     }
 

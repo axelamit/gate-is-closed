@@ -18,6 +18,8 @@ struct map
     int num_boxes;
     int num_connectors;
     int num_connections;
+    int num_input_states;
+    int input_states[MAX_GROUND_SIZE * 3];
 };
 
 void create_map(struct map *m, int level);

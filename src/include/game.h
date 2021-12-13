@@ -21,6 +21,7 @@ struct game
     int time;
     int final_time;
     int state;
+    int input_state;
 
     int curr_button;
     char curr_name[3];

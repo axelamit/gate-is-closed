@@ -5,7 +5,9 @@ enum type
 {
     AND = 0,
     OR = 1,
-    NOT = 2
+    NOT = 2,
+    NAND = 3,
+    NOR = 4
 };
 
 struct box
