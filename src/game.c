@@ -36,16 +36,26 @@ void get_gamestate(int gamestate[], struct game *g)
     gamestate[2] = g->map.width;
     gamestate[3] = g->map.height;
 
-    int buffer_index = 4;
     for (int i = 0; i < g->map.height; i++)
     {
-        int j;
-        for (j = 0; j < g->map.width; j++)
+        for (int j = 0; j < g->map.width; j++)
         {
-            gamestate[4 + (i * g->map.width + j)] = g->map.ground[i][j].texture;
-            buffer_index++;
+            if (g->map.ground[i][j].texture == DOOR_CLOSED)
+            {
+                gamestate[4] = 1;
+                gamestate[5] = i;
+                gamestate[6] = j;
+            }
+            else if (g->map.ground[i][j].texture == DOOR_OPEN)
+            {
+                gamestate[4] = 0;
+                gamestate[5] = i;
+                gamestate[6] = j;
+            }
         }
     }
+
+    int buffer_index = 7;
 
     // Add connectors to gamestate
 
@@ -212,11 +222,6 @@ void next_gamestate(int gamestate[], struct game *g)
     }
     else if (g->state == READ_SCOREBOARD)
     {
-        // for (int i = 0; i < 50; i++)
-        // {
-        //     i2c_send_char(i, 0);
-        // }
-
         add_scoreboard_entry(g->curr_name, g->final_time, g->level);
         get_scoreboard(g);
         g->state = DISPLAY_SCOREBOARD;

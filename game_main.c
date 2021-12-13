@@ -4,10 +4,11 @@
 #include "game_main.h"
 
 #include "src/include/game.h"
+#include "src/include/i2c.h"
 
 struct game g;
-const int N = 3 * (MAX_GROUND_SIZE * MAX_GROUND_SIZE);
-int gamestate[3 * (MAX_GROUND_SIZE * MAX_GROUND_SIZE)];
+const int N = 1 * (MAX_GROUND_SIZE * MAX_GROUND_SIZE);
+int gamestate[1 * (MAX_GROUND_SIZE * MAX_GROUND_SIZE)];
 
 int ticks = 0;
 int timeoutcount = 0;
@@ -134,23 +135,30 @@ void bn_sw_time(void)
         {
             g.curr_button = 0;
         }
+    }
+    else
+    {
+        g.curr_button = 0;
+    }
 
-        if (g.player.is_moving == 0)
+    if (sw_status)
+    {
+        if (sw_status & 8)
         {
-            if (sw_status << 12)
-            {
+            g.player.is_grabbing = 1;
+        }
 
-                g.player.is_grabbing = 1;
-            }
-            else
+        if (sw_status & 1)
+        {
+            for (int i = 0; i < 50; i++)
             {
-                g.player.is_grabbing = 0;
+                i2c_send_char(i, 0);
             }
         }
     }
     else
     {
-        g.curr_button = 0;
+        g.player.is_grabbing = 0;
     }
 }
 

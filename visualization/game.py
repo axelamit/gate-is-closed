@@ -59,24 +59,25 @@ while (running):
     screen.fill((255, 255, 255))
 
     gamestate = get_gamestate()
-
-    buffer_index = 4
     
     # Draw map 
     for i in range(gamestate[3]):
         for j in range(gamestate[2]): 
-            if (gamestate[buffer_index] == 0):
+            if (i == 0 or j == 0 or i == gamestate[3]-1 or j == gamestate[2]-1):
                 # Wall
-                #print ((211,211,211), (j * blocksize * drawing_scale, i * blocksize * drawing_scale, blocksize * drawing_scale, blocksize * drawing_scale))
                 pygame.draw.rect(screen, (211,211,211), (j * blocksize * drawing_scale, i * blocksize * drawing_scale, blocksize * drawing_scale, blocksize * drawing_scale))
-            elif (gamestate[buffer_index] == 1 or gamestate[buffer_index] == 2):
+            else:
                 # Ground
                 pygame.draw.rect(screen, (255,255,255), (j * blocksize * drawing_scale, i * blocksize * drawing_scale, blocksize * drawing_scale, blocksize * drawing_scale))
-            else: 
-                pygame.draw.rect(screen, (101,67,33), (j * blocksize * drawing_scale, i * blocksize * drawing_scale, blocksize * drawing_scale, blocksize * drawing_scale))
+            
 
+    # Door
+    if (gamestate[4]):
+        pygame.draw.rect(screen, (101,67,33), (gamestate[6] * blocksize * drawing_scale, gamestate[5] * blocksize * drawing_scale, blocksize * drawing_scale, blocksize * drawing_scale))
+    else:
+        pygame.draw.rect(screen, (255,255,255), (gamestate[6] * blocksize * drawing_scale, gamestate[5] * blocksize * drawing_scale, blocksize * drawing_scale, blocksize * drawing_scale))
 
-            buffer_index += 1
+    buffer_index = 7
 
     # Draw wires
     n_connectors = gamestate[buffer_index]
@@ -159,10 +160,13 @@ while (running):
     buffer_index += 1
     if (display_scoreboard):
         screen.fill((255, 100, 165))
+        seen = 0
         for i in range(3):
-            text = "{}{}{}: {}".format(chr(gamestate[buffer_index + (i+1)*3]), chr(gamestate[buffer_index + (i+1)*3 + 1]), chr(gamestate[buffer_index + (i+1)*3 + 2]), gamestate[buffer_index])
-            text_surface = font2.render(text, True, (0, 0, 0))
-            screen.blit(text_surface, dest=(100,100 + i*30))
+            if (gamestate[buffer_index + i] != 0):
+                text = "{}{}{}: {}".format(chr(gamestate[buffer_index + (i+1)*3]), chr(gamestate[buffer_index + (i+1)*3 + 1]), chr(gamestate[buffer_index + (i+1)*3 + 2]), gamestate[buffer_index + i])
+                text_surface = font2.render(text, True, (0, 0, 0))
+                screen.blit(text_surface, dest=(100,100 + seen*30))
+                seen += 1
         buffer_index += 12
         
     pygame.display.update()
