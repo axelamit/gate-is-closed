@@ -15,36 +15,36 @@ int connections[2 * MAX_GROUND_SIZE];
 // Level 1
 int height1 = 9;
 int width1 = 10;
-int door_x1 = 5;
+int door_x1 = 6;
 int door_y1 = 0;
 int num_boxes1 = 2;
-int num_connectors1 = 6;
-int num_connections1 = 5;
+int num_connectors1 = 7;
+int num_connections1 = 6;
 int box_pos1[] = {4, 2, 4, 6};
 int box_labels1[] = {AND, OR};
-int connector_pos1[] = {2, 4, 4, 4, 7, 4, 7, 7, 4, 7, 7, 2};
-int connector_labels1[] = {SOURCE, SIMPLE, BOX_CONNECTOR, BOX_CONNECTOR, DOOR_CONNECTOR, SOURCE};
-int connections1[] = {0, 1, 1, 2, 2, 3, 3, 4, 5, 2};
+int connector_pos1[] = {0, 4, 0, 6, 4, 4, 4, 6, 4, 5, 6, 5, 6, 0};
+int connector_labels1[] = {SOURCE, SOURCE, SIMPLE, SIMPLE, BOX_CONNECTOR, SIMPLE, DOOR_CONNECTOR};
+int connections1[] = {0, 2, 1, 3, 2, 4, 3, 4, 4, 5, 5, 6};
 
 int num_input_states1 = 2;
 int input_states1[] = {0, 1, 1, 0};
 
 // Level 2
-int height2 = 12;
-int width2 = 12;
-int door_x2 = 9;
+int height2 = 10;
+int width2 = 10;
+int door_x2 = 6;
 int door_y2 = 0;
-int num_boxes2 = 3;
-int num_connectors2 = 5;
-int num_connections2 = 4;
-int box_pos2[] = {6, 3, 5, 6, 2, 2};
-int box_labels2[] = {AND, AND, OR};
-int connector_pos2[] = {2, 4, 4, 4, 7, 4, 7, 7, 4, 7};
-int connector_labels2[] = {SOURCE, SIMPLE, BOX_CONNECTOR, BOX_CONNECTOR, DOOR_CONNECTOR};
-int connections2[] = {0, 1, 1, 2, 2, 3, 3, 4};
+int num_boxes2 = 5;
+int num_connectors2 = 15;
+int num_connections2 = 16;
+int box_pos2[] = {4, 2, 4, 2, 8, 6, 7, 7, 1, 3};
+int box_labels2[] = {AND, AND, NAND, OR, NOR};
+int connector_pos2[] = {0, 4, 1, 4, 3, 4, 3, 6, 5, 6, 5, 7, 6, 7, 6, 0, 5, 8, 3, 8, 3, 7, 2, 8, 1, 7, 2, 6, 0, 6};
+int connector_labels2[] = {SOURCE, SIMPLE, SIMPLE, BOX_CONNECTOR, SIMPLE, BOX_CONNECTOR, SIMPLE, DOOR_CONNECTOR, SIMPLE, BOX_CONNECTOR, SIMPLE, SIMPLE, SIMPLE, SIMPLE, SOURCE};
+int connections2[] = {0, 1, 1, 2, 1, 12, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 8, 5, 9, 8, 10, 9, 11, 9, 12, 10, 13, 3, 13, 11, 14, 13};
 
-int num_input_states2 = 2;
-int input_states2[] = {0, 1};
+int num_input_states2 = 4;
+int input_states2[] = {0, 0, 1, 1, 0, 1, 0, 1};
 
 // Fill the map with walls on the sides and ground in the middle
 void fill_map(struct map *m)

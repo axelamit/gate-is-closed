@@ -110,8 +110,13 @@ void get_gamestate(int gamestate[], struct game *g)
     }
 
     // Add time to gamestate
-
     gamestate[buffer_index] = g->time;
+    buffer_index++;
+
+    // Add simulation input state to gamestate
+    gamestate[buffer_index] = g->input_state + 1;
+    buffer_index++;
+    gamestate[buffer_index] = g->map.num_input_states;
     buffer_index++;
 
     // Add the name that is currently picked to the gamestate
