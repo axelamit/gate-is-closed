@@ -67,6 +67,7 @@ void i2c_stop()
     i2c_idle();
 }
 
+// Send char to eeprom at location
 void i2c_send_char(int location, char c)
 {
     do
@@ -80,8 +81,10 @@ void i2c_send_char(int location, char c)
     i2c_stop();
 }
 
+// Receive char from eeprom
 char i2c_recv_char(int location)
 {
+    // Set location to read from
     do
     {
         i2c_start();
@@ -90,6 +93,7 @@ char i2c_recv_char(int location)
     i2c_send(EEPROM_MEM_ADDR >> 8);
     i2c_send(EEPROM_MEM_ADDR + location);
 
+    // Recieve char
     i2c_start();
     i2c_send(EEPROM_READ);
 
@@ -100,23 +104,30 @@ char i2c_recv_char(int location)
     return out;
 }
 
-// Not actual int
+// Sends an int (not an actual int, only 4 digits) to eeprom at specified location
 void i2c_send_int(int location, int n)
 {
+    // We only want the first 4 digits
     int d = 1000;
     n = n % (d * 10);
+
+    // Loop through one time for each digit in n
     for (int i = 0; i < 4; i++)
     {
+        // Send digit at index i to eeprom
         i2c_send_char(location + i, n / d);
         n = n % d;
         d /= 10;
     }
 }
 
+// Reads an int (not an actual int, only 4 digits) from eeprom at specified location
 int i2c_recv_int(int location)
 {
     int d = 1000;
     int out = 0;
+
+    // Loop through 4 times to get the digit, also multiply it by its a power of 10 that matches its position
     for (int i = 0; i < 4; i++)
     {
         out += i2c_recv_char(location + i) * d;

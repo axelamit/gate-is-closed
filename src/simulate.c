@@ -4,15 +4,17 @@
 
 int simulate_step(int index, struct map *m)
 {
+    // Get the current connector type
     int type = m->connectors[index].connector_type;
 
+    // If type is source we want to return its state
     if (type == SOURCE)
     {
         return m->connectors[index].state;
     }
 
+    // Recursively call each of the current nodes children and save their values to the inputs array
     int inputs[4];
-
     for (int i = 0; i < 4; i++)
     {
         int next_node = m->connectors[index].backwards_connections[i];
@@ -26,8 +28,10 @@ int simulate_step(int index, struct map *m)
         }
     }
 
+    // Check current type
     if (type != BOX_CONNECTOR)
     {
+        // When the type isn't a box_connector we want the output to be one if any of the inputs is one
         for (int i = 0; i < 4; i++)
         {
             // If one of the parent nodes is lit, so should the current node also be
@@ -47,9 +51,11 @@ int simulate_step(int index, struct map *m)
         {
             if (m->boxes[i].x / m->grid_size == curr_x && m->boxes[i].y / m->grid_size == curr_y)
             {
+                // There is a box at the current node
 
                 if (m->boxes[i].type == OR)
                 {
+                    // If the type of the box is OR we want the output to be 1 if any of the inputs is 1
                     for (int j = 0; j < 4; j++)
                     {
                         if (inputs[j] == 1)
@@ -61,6 +67,7 @@ int simulate_step(int index, struct map *m)
                 }
                 else if (m->boxes[i].type == AND)
                 {
+                    // If the type of the box is AND we want the output to be 0 if any of the inputs is 0, else 1
                     for (int j = 0; j < 4; j++)
                     {
                         if (inputs[j] == 0)
@@ -72,6 +79,7 @@ int simulate_step(int index, struct map *m)
                 }
                 else if (m->boxes[i].type == NOT)
                 {
+                    // If any of the inputs is 1 the output is 0, else 1
                     for (int j = 0; j < 4; j++)
                     {
                         if (inputs[j] == 1)
@@ -83,6 +91,7 @@ int simulate_step(int index, struct map *m)
                 }
                 else if (m->boxes[i].type == NAND)
                 {
+                    // Same as AND but the output is reversed
                     for (int j = 0; j < 4; j++)
                     {
                         if (inputs[j] == 0)
@@ -94,6 +103,7 @@ int simulate_step(int index, struct map *m)
                 }
                 else if (m->boxes[i].type == NOR)
                 {
+                    // Same as OR but the output is reversed
                     for (int j = 0; j < 4; j++)
                     {
                         if (inputs[j] == 1)
@@ -120,10 +130,12 @@ int simulate(struct map *m, int input_state)
     {
         if (m->connectors[i].connector_type == DOOR_CONNECTOR)
         {
+            // Door found, assign to door_index
             door_index = i;
         }
         else if (m->connectors[i].connector_type == SOURCE)
         {
+            // Source found, set the state of the source to the corresponding input_state offset
             m->connectors[i].state = m->input_states[sources * m->num_input_states + input_state];
             sources++;
         }

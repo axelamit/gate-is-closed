@@ -46,12 +46,14 @@ int connections2[] = {0, 1, 1, 2, 2, 3, 3, 4};
 int num_input_states2 = 2;
 int input_states2[] = {0, 1};
 
+// Fill the map with walls on the sides and ground in the middle
 void fill_map(struct map *m)
 {
     for (int i = 0; i < m->height; i++)
     {
         for (int j = 0; j < m->width; j++)
         {
+            // Check if the current position is on any of the sides
             if (i == 0 || j == 0 || i == m->height - 1 || j == m->width - 1)
             {
                 map[i * m->width + j] = WALL;
@@ -64,11 +66,15 @@ void fill_map(struct map *m)
     }
 }
 
+// Writes the values of the current level to the global level arrays
 void create_level(struct map *m, int height, int width, int door_x, int door_y, int num_boxes, int num_connectors, int num_connections, int *curr_box_pos, int *curr_box_labels, int *curr_connector_pos, int *curr_connector_labels, int *curr_connections, int num_input_states, int *curr_input_states)
 {
+    // Copy the values to the global arrays
+
     m->height = height;
     m->width = width;
 
+    // Fill map and add a door
     fill_map(m);
     map[door_y * m->width + door_x] = DOOR_CLOSED;
 
@@ -97,6 +103,7 @@ void create_level(struct map *m, int height, int width, int door_x, int door_y, 
     {
         if (curr_connector_labels[i] == SOURCE)
         {
+            // Count the number of input sources (used in the  next for-loop)
             num_inputs++;
         }
 
@@ -114,10 +121,13 @@ void create_level(struct map *m, int height, int width, int door_x, int door_y, 
     }
 }
 
+// Create the map based on the current level
 void create_map(struct map *m, int level)
 {
+    // Set grid size of map
     m->grid_size = 100;
 
+    // Create the level
     if (level == 1)
     {
         create_level(m, height1, width1, door_x1, door_y1, num_boxes1, num_connectors1, num_connections1, box_pos1, box_labels1, connector_pos1, connector_labels1, connections1, num_input_states1, input_states1);
@@ -127,6 +137,7 @@ void create_map(struct map *m, int level)
         create_level(m, height2, width2, door_x2, door_y2, num_boxes2, num_connectors2, num_connections2, box_pos2, box_labels2, connector_pos2, connector_labels2, connections2, num_input_states2, input_states2);
     }
 
+    // Save map values
     for (int i = 0; i < m->height; i++)
     {
         for (int j = 0; j < m->width; j++)
@@ -135,6 +146,7 @@ void create_map(struct map *m, int level)
         }
     }
 
+    // Save box values
     for (int i = 0; i < m->num_boxes; i++)
     {
         m->boxes[i].rotation = 0;
@@ -147,6 +159,7 @@ void create_map(struct map *m, int level)
         m->boxes[i].y = m->boxes[i].y * m->grid_size;
     }
 
+    // Save connector values
     for (int i = 0; i < m->num_connectors; i++)
     {
         m->connectors[i].state = 0;
@@ -169,12 +182,13 @@ void create_map(struct map *m, int level)
         m->connectors[i].y = connector_pos[i * 2 + 1];
     }
 
+    // Sva connections
     for (int i = 0; i < m->num_connections; i++)
     {
         int frm = connections[i * 2];
         int to = connections[i * 2 + 1];
 
-        // Check for connection that has not been assigned yet
+        // Check for forward_connection that has not been assigned yet
         for (int j = 0; j < sizeof(m->connectors[frm].forward_connections); j++)
         {
             if (m->connectors[frm].forward_connections[j] == -1)
@@ -184,6 +198,7 @@ void create_map(struct map *m, int level)
             }
         }
 
+        // Check for backwards_connection that has not been assigned yet
         for (int j = 0; j < sizeof(m->connectors[to].backwards_connections); j++)
         {
             if (m->connectors[to].backwards_connections[j] == -1)

@@ -195,7 +195,7 @@ while (running):
         screen.fill((255, 255, 255))
         text = "Name: {}{}{}".format(chr(gamestate[buffer_index]), chr(gamestate[buffer_index + 1]), chr(gamestate[buffer_index + 2]))
         text_surface = font2.render(text, True, (0, 0, 0))
-        screen.blit(text_surface, dest=(100,100))
+        screen.blit(text_surface, dest=(blocksize * 10 * drawing_scale / 2 - 100, blocksize * 10 * drawing_scale / 2 - 100))
         buffer_index += 3
 
     # Display scoreboard

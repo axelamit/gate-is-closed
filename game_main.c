@@ -2,27 +2,36 @@
 #include <pic32mx.h>
 
 #include "game_main.h"
+#include "utils.h"
+#include "uart.h"
 
 #include "src/include/game.h"
 #include "src/include/i2c.h"
 
+// Declare game struct and gamestate
 struct game g;
 const int N = 1 * (MAX_GROUND_SIZE * MAX_GROUND_SIZE);
 int gamestate[1 * (MAX_GROUND_SIZE * MAX_GROUND_SIZE)];
 
+// Timer globals
 int ticks = 0;
 int timeoutcount = 0;
+
+// Switch globals
 int switch_state = 1;
 
+// Interrupt handler
 void user_isr(void)
 {
     if (check_timeout() && timeoutcount == 10)
     {
+        // Increase game time when clock is ticking
         g.time++;
         timeoutcount = 0;
     }
 }
 
+// Handle interrupts (timer)
 int check_timeout(void)
 {
     if (IFS(0) & (1 << 8))
@@ -41,31 +50,40 @@ int check_timeout(void)
     return 0;
 }
 
+// Get state of button 2-4
 int getbtns(void)
 {
     return ((PORTD & (7 << 5)) >> 5);
 }
 
+// Get state of button 1
 int getbtn1(void)
 {
     return (PORTF >> 1) & 1;
 }
 
+// Get state of switches
 int getsw(void)
 {
     return ((PORTD & (0xf << 8)) >> 8);
 }
 
+// Check buttons and switches
 void bn_sw_time(void)
 {
+    // Get status of buttons and switches
     int btn_status = getbtns();
     int btn1_status = getbtn1();
     int sw_status = getsw();
+
+    // Check if any of the buttons is pressed
     if (btn_status || btn1_status)
     {
         if (btn_status & 4)
-        { // btn4
-            // Left
+        {
+            // Btn4 - Left is pressed
+
+            // Change what button is currently pressed only if it was just pressed (can't hold in the button)
             if (g.curr_button != 4 && g.curr_button != -1)
             {
                 g.curr_button = 4;
@@ -74,6 +92,8 @@ void bn_sw_time(void)
             {
                 g.curr_button = -1;
             }
+
+            // If player isn't moving we change the direction and move the player
             if (g.player.is_moving == 0)
             {
                 g.player.direction = 0;
@@ -81,8 +101,10 @@ void bn_sw_time(void)
             }
         }
         else if (btn_status & 2)
-        { // btn3
-            // Right
+        {
+            // Btn3 - Right is pressed
+
+            // Change what button is currently pressed only if it was just pressed (can't hold in the button)
             if (g.curr_button != 3 && g.curr_button != -1)
             {
                 g.curr_button = 3;
@@ -91,6 +113,8 @@ void bn_sw_time(void)
             {
                 g.curr_button = -1;
             }
+
+            // If player isn't moving we change the direction and move the player
             if (g.player.is_moving == 0)
             {
                 g.player.direction = 2;
@@ -98,8 +122,10 @@ void bn_sw_time(void)
             }
         }
         else if (btn_status & 1)
-        { // btn2
-            // Up
+        {
+            // Btn2 - Up is pressed
+
+            // Change what button is currently pressed only if it was just pressed (can't hold in the button)
             if (g.curr_button != 2 && g.curr_button != -1)
             {
                 g.curr_button = 2;
@@ -108,6 +134,8 @@ void bn_sw_time(void)
             {
                 g.curr_button = -1;
             }
+
+            // If player isn't moving we change the direction and move the player
             if (g.player.is_moving == 0)
             {
                 g.player.direction = 1;
@@ -116,7 +144,9 @@ void bn_sw_time(void)
         }
         else if (btn1_status)
         {
-            // Down
+            // Btn1 - Down is pressed
+
+            // Change what button is currently pressed only if it was just pressed (can't hold in the button)
             if (g.curr_button != 1 && g.curr_button != -1)
             {
                 g.curr_button = 1;
@@ -126,6 +156,7 @@ void bn_sw_time(void)
                 g.curr_button = -1;
             }
 
+            // If player isn't moving we change the direction and move the player
             if (g.player.is_moving == 0)
             {
                 g.player.direction = 3;
@@ -134,25 +165,31 @@ void bn_sw_time(void)
         }
         else
         {
+            // Non mapped button was pressed
             g.curr_button = 0;
         }
     }
     else
     {
+        // No button was pressed
         g.curr_button = 0;
     }
 
+    // Check if any of the switches is on
     if (sw_status)
     {
+        // Check is switch 4 is on, if so the player is grabbing
         if (sw_status & 8)
         {
             g.player.is_grabbing = 1;
         }
 
+        // Check if switch 3 is on, if so we want to switch the input state of the game (we only want to do this once the time the switch is flipped)
         if (sw_status & 4)
         {
             if (switch_state)
             {
+                // Increase input state, wraps to 0 if too large
                 g.input_state++;
                 if (g.input_state == g.map.num_input_states)
                 {
@@ -162,6 +199,7 @@ void bn_sw_time(void)
             }
         }
 
+        // If switch 1 is flipped the eeprom data is reseted
         if (sw_status & 1)
         {
             for (int i = 0; i < 50; i++)
@@ -172,9 +210,13 @@ void bn_sw_time(void)
     }
     else
     {
+        // Player is not grabbing
         g.player.is_grabbing = 0;
+
+        // Switch is flipped to 0, increase input state
         if (switch_state == 0)
         {
+            // Increase input state, wraps to 0 if too large
             g.input_state++;
             if (g.input_state == g.map.num_input_states)
             {
@@ -185,27 +227,7 @@ void bn_sw_time(void)
     }
 }
 
-// From mcb32 toolchain github
-int calculate_baudrate_divider(int sysclk, int baudrate, int highspeed)
-{
-    int pbclk, uxbrg, divmult;
-    unsigned int pbdiv;
-
-    divmult = (highspeed) ? 4 : 16;
-    /* Periphial Bus Clock is divided by PBDIV in OSCCON */
-    pbdiv = (OSCCON & 0x180000) >> 19;
-    pbclk = sysclk >> pbdiv;
-
-    /* Multiply by two, this way we can round the divider up if needed */
-    uxbrg = ((pbclk * 2) / (divmult * baudrate)) - 2;
-    /* We'll get closer if we round up */
-    if (uxbrg & 1)
-        uxbrg >>= 1, uxbrg++;
-    else
-        uxbrg >>= 1;
-    return uxbrg;
-}
-
+// Initialize i2c registers
 void i2c_init()
 {
     I2C1CON = 0x0;
@@ -233,7 +255,7 @@ void game_init(void)
     IEC(0) |= (1 << 15);
 
     IPC(2) |= 0x1f;     // sets priority and subpriority to max
-    IEC(0) |= (1 << 8); // enable intrrupts for timer2
+    IEC(0) |= (1 << 8); // enable interrupts for timer2
     enable_interrupt(); // enable global interrupts via MIPS
 
     /* Configure UART1 for 115200 baud, no interrupts */
@@ -244,92 +266,40 @@ void game_init(void)
     /* Enable transmit and recieve */
     U1STASET = 0x1400;
 
+    // Init i2c registers
     i2c_init();
 
+    // Initialize game, to level 1
     init_game(&g, 1);
 
     return;
 }
 
-#define ITOA_BUFSIZ (24)
-char *itoaconv(int num)
-{
-    register int i, sign;
-    static char itoa_buffer[ITOA_BUFSIZ];
-    static const char maxneg[] = "-2147483648";
-
-    itoa_buffer[ITOA_BUFSIZ - 1] = 0; /* Insert the end-of-string marker. */
-    sign = num;                       /* Save sign. */
-    if (num < 0 && num - 1 > 0)       /* Check for most negative integer */
-    {
-        for (i = 0; i < sizeof(maxneg); i += 1)
-            itoa_buffer[i + 1] = maxneg[i];
-        i = 0;
-    }
-    else
-    {
-        if (num < 0)
-            num = -num;      /* Make number positive. */
-        i = ITOA_BUFSIZ - 2; /* Location for first ASCII digit. */
-        do
-        {
-            itoa_buffer[i] = num % 10 + '0'; /* Insert next digit. */
-            num = num / 10;                  /* Remove digit from number. */
-            i -= 1;                          /* Move index to next empty position. */
-        } while (num > 0);
-        if (sign < 0)
-        {
-            itoa_buffer[i] = '-';
-            i -= 1;
-        }
-    }
-    /* Since the loop always sets the index i to the next empty position,
-     * we must add 1 in order to return a pointer to the first occupied position. */
-    return (&itoa_buffer[i + 1]);
-}
-
-void send_int(int a)
-{
-    for (int i = 0; i < 4; i++)
-    {
-        while (1)
-        {
-            if (!(U1STA & (1 << 9)))
-            {
-                U1TXREG = *(itoaconv(a) + i);
-                break;
-            }
-        }
-    }
-}
-
-void send_char(char a)
-{
-    while (1)
-    {
-        if (!(U1STA & (1 << 9)))
-        {
-            U1TXREG = a;
-            break;
-        }
-    }
-}
-
+// Send gamestate to computer via uart
 void send_gamestate(int gamestate[])
 {
+    // Send start signal
     send_char('s');
+
+    // Send length of gamestate
     send_int(N);
 
+    // Send each digit in gamestate
     for (int i = 0; i < N; i++)
     {
         send_int(gamestate[i]);
     }
 }
 
-// int iteration = 0;
+// Loop for game
 void game_loop()
 {
+    // Check buttons
     bn_sw_time();
+
+    // Get next gamestate
     next_gamestate(gamestate, &g);
+
+    // Send gamestate to computer via UART
     send_gamestate(gamestate);
 }

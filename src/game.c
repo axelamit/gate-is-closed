@@ -5,6 +5,7 @@
 #include "include/i2c.h"
 #include "include/scoreboard.h"
 
+// Add the initial values to the game
 void init_game(struct game *g, int level)
 {
     init_player(&g->player, 100, 100, 0); // starting pos should be dependent on the size of the grid (change this + player.c)
@@ -27,13 +28,14 @@ void init_game(struct game *g, int level)
     }
 }
 
+// Adds all of the gamestate data into one array that can be sent to the computer via UART
 void get_gamestate(int gamestate[], struct game *g)
 {
+    // Add player pos
     gamestate[0] = g->player.pos_x;
     gamestate[1] = g->player.pos_y;
 
     // Add map to gamestate
-
     gamestate[2] = g->map.width;
     gamestate[3] = g->map.height;
 
@@ -76,6 +78,7 @@ void get_gamestate(int gamestate[], struct game *g)
 
         buffer_index += 3;
 
+        // Loop through each of the current connectors children and add them to the gamestate if present
         for (int j = 0; j < 4; j++)
         {
             int next_index = g->map.connectors[i].forward_connections[j];
@@ -106,10 +109,12 @@ void get_gamestate(int gamestate[], struct game *g)
         buffer_index += 3;
     }
 
+    // Add time to gamestate
+
     gamestate[buffer_index] = g->time;
     buffer_index++;
 
-    // Pick name
+    // Add the name that is currently picked to the gamestate
     gamestate[buffer_index] = 0;
     if (g->state == SELECT_NAME || g->state == READ_SCOREBOARD)
     {
@@ -167,11 +172,17 @@ void get_gamestate(int gamestate[], struct game *g)
     }
 }
 
+// Get the next gamestate
 void next_gamestate(int gamestate[], struct game *g)
 {
     if (g->state == GAME)
     {
+        // The game is in "play mode"
+
+        // Move player while checking for collision
         move_player(&g->player, &g->map);
+
+        // Simulate all input_states except the one selected, if the door is closed on any of the simulations the level is not complete
 
         int complete = 1;
         for (int i = 0; i < g->input_state; i++)
@@ -192,13 +203,17 @@ void next_gamestate(int gamestate[], struct game *g)
             }
         }
 
+        // Simulate the current input_state, this is done in order to for that state to be the one displayed on the screen
         int comp = simulate(&g->map, g->input_state);
         if (comp == 0)
         {
             complete = 0;
         }
+
+        // Check if level is complete
         if (complete)
         {
+            // Find the door and switch its state from closed to open
             int door_x = -1;
             int door_y = -1;
             for (int i = 0; i < g->map.height; i++)
@@ -214,16 +229,23 @@ void next_gamestate(int gamestate[], struct game *g)
                 }
             }
 
+            // Check if player is at the same position as the door, if so the level is officially completed
             if (door_x == g->player.pos_x && door_y == g->player.pos_y)
             {
+                // Save the final time
                 g->final_time = g->time;
+
+                // Check if time is fast enough to place on the scoreboard
                 int pos = get_scoreboard_pos(g->final_time, g->level);
+
                 if (pos == -1)
                 {
+                    // Time is too slow, goto next game
                     g->state = NEXT_GAME;
                 }
                 else
                 {
+                    // Time is fast enough, select a name that is placed on the scoreboard
                     g->state = SELECT_NAME;
                 }
             }
@@ -233,10 +255,12 @@ void next_gamestate(int gamestate[], struct game *g)
     {
         if (g->curr_button == 1)
         {
+            // Selection of name is done, read scoreboard
             g->state = READ_SCOREBOARD;
         }
         else
         {
+            // Check if any button corresponding to any of the letters is pressed. If so we increase the value of that letter. If its greater than 90 (Z) we wrap back to A.
             for (int i = 2; i <= 4; i++)
             {
                 if (g->curr_button == i)
@@ -252,12 +276,18 @@ void next_gamestate(int gamestate[], struct game *g)
     }
     else if (g->state == READ_SCOREBOARD)
     {
+        // Add current run to the scoreboard
         add_scoreboard_entry(g->curr_name, g->final_time, g->level);
+
+        // Load the scoreboard
         get_scoreboard(g);
+
+        // Display scoreboard
         g->state = DISPLAY_SCOREBOARD;
     }
     else if (g->state == DISPLAY_SCOREBOARD)
     {
+        // Display scoreboard until a button is pressed to start the next game
         if (g->curr_button == 1)
         {
             g->state = NEXT_GAME;
@@ -265,13 +295,23 @@ void next_gamestate(int gamestate[], struct game *g)
     }
     else if (g->state == NEXT_GAME)
     {
+        // Prepare for the next game
+
+        // Reset player position
         g->player.pos_x = 100;
         g->player.pos_y = 100;
+
+        // Increase the level
         g->level++;
         create_map(&g->map, g->level);
+
+        // Reset time
         g->time = 0;
+
+        // Start the level
         g->state = GAME;
     }
 
+    // Load in the new gamestate
     get_gamestate(gamestate, g);
 }

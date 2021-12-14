@@ -13,7 +13,6 @@ struct player
     int direction;
     int is_moving;
     float speed;
-    float acceleration;
 
     int move_steps;
     int move_counter;
