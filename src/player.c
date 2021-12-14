@@ -11,7 +11,7 @@ void init_player(struct player *p, int x, int y, int direction)
     p->pos_y = y;
     p->direction = direction;
 
-    p->speed = 25;
+    p->speed = 20;
     p->is_moving = 0;
 
     p->move_counter = 0;

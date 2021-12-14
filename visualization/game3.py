@@ -237,9 +237,14 @@ while (running):
                 wall.convert()
                 screen.blit(wall, (k * blocksize * drawing_scale, l * blocksize * drawing_scale))
 
-        text = "Name: {}{}{}".format(chr(gamestate[buffer_index]), chr(gamestate[buffer_index + 1]), chr(gamestate[buffer_index + 2]))
+        scoreboard = pygame.image.load('images/scoreboard.png')
+        scoreboard = pygame.transform.scale(scoreboard, (int(blocksize * drawing_scale*4.5), int(blocksize * drawing_scale*2)))
+        scoreboard.convert()
+        screen.blit(scoreboard, ((stop/4)* blocksize* drawing_scale,(stop/4.5) * blocksize  * drawing_scale))
+
+        text = "Select name: {}{}{}".format(chr(gamestate[buffer_index]), chr(gamestate[buffer_index + 1]), chr(gamestate[buffer_index + 2]))
         text_surface = font2.render(text, True, (0, 0, 0))
-        screen.blit(text_surface, dest=((stop/4)* blocksize* drawing_scale,(stop/4) * blocksize  * drawing_scale))
+        screen.blit(text_surface, dest=((stop/3.5)* blocksize* drawing_scale,(stop/3.5) * blocksize  * drawing_scale))
         buffer_index += 3
 
     # Display scoreboard
@@ -261,6 +266,10 @@ while (running):
         scoreboard = pygame.transform.scale(scoreboard, (int(blocksize * drawing_scale*4), int(blocksize * drawing_scale*6)))
         scoreboard.convert()
         screen.blit(scoreboard, ((stop/3.5)* blocksize* drawing_scale,(stop/4.5) * blocksize  * drawing_scale))
+
+        text = "Scoreboard"
+        text_surface = font2.render(text, True, (0, 0, 0))
+        screen.blit(text_surface, dest=((stop/2.8)* blocksize* drawing_scale,(stop/3) * blocksize  * drawing_scale - blocksize*0.7))
 
         for i in range(3):
             if (gamestate[buffer_index + i] != 0):

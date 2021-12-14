@@ -20,7 +20,7 @@ int door_y1 = 0;
 int num_boxes1 = 2;
 int num_connectors1 = 7;
 int num_connections1 = 6;
-int box_pos1[] = {4, 2, 4, 6};
+int box_pos1[] = {4, 2, 6, 6};
 int box_labels1[] = {AND, OR};
 int connector_pos1[] = {0, 4, 0, 6, 4, 4, 4, 6, 4, 5, 6, 5, 6, 0};
 int connector_labels1[] = {SOURCE, SOURCE, SIMPLE, SIMPLE, BOX_CONNECTOR, SIMPLE, DOOR_CONNECTOR};
@@ -182,7 +182,7 @@ void create_map(struct map *m, int level)
         m->connectors[i].y = connector_pos[i * 2 + 1];
     }
 
-    // Sva connections
+    // Save connections
     for (int i = 0; i < m->num_connections; i++)
     {
         int frm = connections[i * 2];
